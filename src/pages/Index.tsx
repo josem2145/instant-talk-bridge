@@ -5,6 +5,7 @@ import { SignupForm } from "@/components/auth/signup-form";
 import ChatPage from "./Chat";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 
 const Index = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -148,11 +149,14 @@ const Index = () => {
   }
 
   return (
-    <LoginForm
-      onLogin={handleLogin}
-      onForgotPassword={handleForgotPassword}
-      onCreateAccount={handleCreateAccount}
-    />
+    <>
+      <LoginForm
+        onLogin={handleLogin}
+        onForgotPassword={handleForgotPassword}
+        onCreateAccount={handleCreateAccount}
+      />
+      <InstallPrompt />
+    </>
   );
 };
 
