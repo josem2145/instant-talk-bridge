@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { UserList } from "@/components/chat/user-list";
-import { ChatInterface } from "@/components/chat/chat-interface";
-import { ConversationList } from "@/components/chat/conversation-list";
 import { Button } from "@/components/ui/button";
-import { Users, MessageSquare, LogOut } from "lucide-react";
-import { User, Conversation } from "@/types/user";
+import { UserList } from "@/components/chat/user-list";
+import { ConversationList } from "@/components/chat/conversation-list";
+import { ChatInterface } from "@/components/chat/chat-interface";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useUserStatus } from "@/hooks/useUserStatus";
+import { LogOut, Users, MessageSquare } from "lucide-react";
+import { User } from "@/types/user";
 
 type View = "users" | "conversations" | "chat";
 
@@ -15,15 +17,18 @@ interface ChatPageProps {
 export default function ChatPage({ onLogout }: ChatPageProps) {
   const [currentView, setCurrentView] = useState<View>("users");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [isMobile] = useState(window.innerWidth < 1024);
+  const isMobile = useIsMobile();
+  
+  // Keep user status updated
+  useUserStatus();
 
   const handleStartChat = (user: User) => {
     setSelectedUser(user);
     setCurrentView("chat");
   };
 
-  const handleSelectConversation = (conversation: Conversation) => {
-    setSelectedUser(conversation.user);
+  const handleSelectConversation = (user: User) => {
+    setSelectedUser(user);
     setCurrentView("chat");
   };
 

@@ -5,52 +5,48 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StatusIndicator } from "@/components/ui/status-indicator";
 import { User } from "@/types/user";
-
-interface Message {
-  id: string;
-  content: string;
-  timestamp: Date;
-  sender: "me" | "other";
-}
+import { useRealTimeMessages } from "@/hooks/useRealTimeMessages";
+import { useConversations } from "@/hooks/useConversations";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ChatInterfaceProps {
   user: User;
   onBack: () => void;
 }
 
-// Mock messages for demonstration
-const mockMessages: Message[] = [
-  {
-    id: "1",
-    content: "Oi! Como você está?",
-    timestamp: new Date(Date.now() - 1000 * 60 * 30),
-    sender: "other",
-  },
-  {
-    id: "2",
-    content: "Oi! Estou bem, obrigado! E você?",
-    timestamp: new Date(Date.now() - 1000 * 60 * 25),
-    sender: "me",
-  },
-  {
-    id: "3",
-    content: "Também estou bem! Você viu as novidades do projeto?",
-    timestamp: new Date(Date.now() - 1000 * 60 * 20),
-    sender: "other",
-  },
-  {
-    id: "4",
-    content: "Sim! Ficou muito bom. Parabéns pelo trabalho!",
-    timestamp: new Date(Date.now() - 1000 * 60 * 15),
-    sender: "me",
-  },
-];
-
 export function ChatInterface({ user, onBack }: ChatInterfaceProps) {
-  const [messages, setMessages] = useState<Message[]>(mockMessages);
   const [newMessage, setNewMessage] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  const { getOrCreateConversation } = useConversations(currentUserId);
+  const { messages, loading, sendMessage } = useRealTimeMessages({ 
+    conversationId, 
+    currentUserId 
+  });
+
+  // Get current user
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (authUser) {
+        setCurrentUserId(authUser.id);
+      }
+    };
+    getCurrentUser();
+  }, []);
+
+  // Get or create conversation when user changes
+  useEffect(() => {
+    const initConversation = async () => {
+      if (currentUserId && user.user_id) {
+        const convId = await getOrCreateConversation(user.user_id);
+        setConversationId(convId);
+      }
+    };
+    initConversation();
+  }, [currentUserId, user.user_id, getOrCreateConversation]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -60,35 +56,20 @@ export function ChatInterface({ user, onBack }: ChatInterfaceProps) {
     scrollToBottom();
   }, [messages]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
 
-    const message: Message = {
-      id: Date.now().toString(),
-      content: newMessage,
-      timestamp: new Date(),
-      sender: "me",
-    };
-
-    setMessages(prev => [...prev, message]);
-    setNewMessage("");
-
-    // Simulate typing indicator and response
-    setIsTyping(true);
-    setTimeout(() => {
-      setIsTyping(false);
-      const response: Message = {
-        id: (Date.now() + 1).toString(),
-        content: "Obrigado pela mensagem! Esta é uma resposta automática.",
-        timestamp: new Date(),
-        sender: "other",
-      };
-      setMessages(prev => [...prev, response]);
-    }, 2000);
+    try {
+      await sendMessage(newMessage);
+      setNewMessage("");
+    } catch (error) {
+      console.error('Failed to send message:', error);
+    }
   };
 
-  const formatTime = (date: Date) => {
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
     return date.toLocaleTimeString("pt-BR", {
       hour: "2-digit",
       minute: "2-digit",
@@ -132,7 +113,7 @@ export function ChatInterface({ user, onBack }: ChatInterfaceProps) {
               Conversando com {user.display_name}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {isTyping ? "digitando..." : user.status === "online" ? "online" : "offline"}
+              {user.status === "online" ? "online" : "offline"}
             </p>
           </div>
         </div>
@@ -152,39 +133,34 @@ export function ChatInterface({ user, onBack }: ChatInterfaceProps) {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-subtle">
-        {messages.map((message, index) => (
-          <div
-            key={message.id}
-            className={`flex ${message.sender === "me" ? "justify-end" : "justify-start"} animate-slide-in`}
-            style={{ animationDelay: `${index * 50}ms` }}
-          >
-            <div
-              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-message ${
-                message.sender === "me"
-                  ? "bg-gradient-chat text-white rounded-br-md"
-                  : "bg-chat-bubble-received text-foreground rounded-bl-md"
-              }`}
-            >
-              <p className="text-sm">{message.content}</p>
-              <p className={`text-xs mt-1 ${
-                message.sender === "me" ? "text-white/70" : "text-muted-foreground"
-              }`}>
-                {formatTime(message.timestamp)}
-              </p>
-            </div>
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-2 text-muted-foreground">Carregando mensagens...</p>
           </div>
-        ))}
-        
-        {isTyping && (
-          <div className="flex justify-start animate-bounce-in">
-            <div className="bg-chat-bubble-received px-4 py-2 rounded-2xl rounded-bl-md shadow-message">
-              <div className="flex space-x-1">
-                <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse"></div>
-                <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse" style={{ animationDelay: "0.2s" }}></div>
-                <div className="w-2 h-2 bg-muted-foreground rounded-full animate-pulse" style={{ animationDelay: "0.4s" }}></div>
+        ) : (
+          messages.map((message, index) => (
+            <div
+              key={message.id}
+              className={`flex ${message.sender_id === currentUserId ? "justify-end" : "justify-start"} animate-slide-in`}
+              style={{ animationDelay: `${index * 50}ms` }}
+            >
+              <div
+                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl shadow-message ${
+                  message.sender_id === currentUserId
+                    ? "bg-gradient-chat text-white rounded-br-md"
+                    : "bg-chat-bubble-received text-foreground rounded-bl-md"
+                }`}
+              >
+                <p className="text-sm">{message.content}</p>
+                <p className={`text-xs mt-1 ${
+                  message.sender_id === currentUserId ? "text-white/70" : "text-muted-foreground"
+                }`}>
+                  {formatTime(message.created_at)}
+                </p>
               </div>
             </div>
-          </div>
+          ))
         )}
         
         <div ref={messagesEndRef} />
