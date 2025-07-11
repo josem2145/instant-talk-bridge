@@ -1,74 +1,13 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StatusIndicator } from "@/components/ui/status-indicator";
-
-interface Conversation {
-  id: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    status: "online" | "away" | "busy" | "offline";
-    avatar?: string;
-  };
-  lastMessage: {
-    content: string;
-    timestamp: Date;
-    sender: "me" | "other";
-  };
-  unreadCount?: number;
-}
+import { Conversation } from "@/types/user";
 
 interface ConversationListProps {
   onSelectConversation: (conversation: Conversation) => void;
 }
 
-// Mock conversations for demonstration
-const mockConversations: Conversation[] = [
-  {
-    id: "1",
-    user: {
-      id: "1",
-      name: "Ana Silva",
-      email: "ana@email.com",
-      status: "online",
-    },
-    lastMessage: {
-      content: "Oi! Como você está?",
-      timestamp: new Date(Date.now() - 1000 * 60 * 30),
-      sender: "other",
-    },
-    unreadCount: 2,
-  },
-  {
-    id: "2",
-    user: {
-      id: "2",
-      name: "Carlos Santos",
-      email: "carlos@email.com",
-      status: "away",
-    },
-    lastMessage: {
-      content: "Obrigado pela ajuda!",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
-      sender: "me",
-    },
-  },
-  {
-    id: "3",
-    user: {
-      id: "3",
-      name: "Maria Oliveira",
-      email: "maria@email.com",
-      status: "online",
-    },
-    lastMessage: {
-      content: "Vamos marcar a reunião para amanhã?",
-      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4),
-      sender: "other",
-    },
-    unreadCount: 1,
-  },
-];
+// Mock conversations for demonstration - will be replaced with real data
+const mockConversations: Conversation[] = [];
 
 export function ConversationList({ onSelectConversation }: ConversationListProps) {
   const getInitials = (name: string) => {
@@ -121,9 +60,9 @@ export function ConversationList({ onSelectConversation }: ConversationListProps
             <div className="flex items-center space-x-3">
               <div className="relative">
                 <Avatar className="h-12 w-12">
-                  <AvatarImage src={conversation.user.avatar} alt={conversation.user.name} />
+                  <AvatarImage src="" alt={conversation.user.display_name} />
                   <AvatarFallback className="bg-gradient-chat text-white font-semibold">
-                    {getInitials(conversation.user.name)}
+                    {getInitials(conversation.user.display_name)}
                   </AvatarFallback>
                 </Avatar>
                 <StatusIndicator
@@ -136,7 +75,7 @@ export function ConversationList({ onSelectConversation }: ConversationListProps
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                   <h3 className="font-semibold text-foreground truncate">
-                    {conversation.user.name}
+                    {conversation.user.display_name}
                   </h3>
                   <div className="flex items-center space-x-2">
                     <span className="text-xs text-muted-foreground">

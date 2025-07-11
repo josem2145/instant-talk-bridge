@@ -4,20 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StatusIndicator } from "@/components/ui/status-indicator";
+import { User } from "@/types/user";
 
 interface Message {
   id: string;
   content: string;
   timestamp: Date;
   sender: "me" | "other";
-}
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  status: "online" | "away" | "busy" | "offline";
-  avatar?: string;
 }
 
 interface ChatInterfaceProps {
@@ -122,9 +115,9 @@ export function ChatInterface({ user, onBack }: ChatInterfaceProps) {
           
           <div className="relative">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={user.avatar} alt={user.name} />
+              <AvatarImage src="" alt={user.display_name} />
               <AvatarFallback className="bg-gradient-chat text-white font-semibold text-sm">
-                {getInitials(user.name)}
+                {getInitials(user.display_name)}
               </AvatarFallback>
             </Avatar>
             <StatusIndicator
@@ -136,7 +129,7 @@ export function ChatInterface({ user, onBack }: ChatInterfaceProps) {
           
           <div>
             <h2 className="font-semibold text-foreground">
-              Conversando com {user.name}
+              Conversando com {user.display_name}
             </h2>
             <p className="text-sm text-muted-foreground">
               {isTyping ? "digitando..." : user.status === "online" ? "online" : "offline"}

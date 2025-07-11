@@ -4,25 +4,7 @@ import { ChatInterface } from "@/components/chat/chat-interface";
 import { ConversationList } from "@/components/chat/conversation-list";
 import { Button } from "@/components/ui/button";
 import { Users, MessageSquare, LogOut } from "lucide-react";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  status: "online" | "away" | "busy" | "offline";
-  avatar?: string;
-}
-
-interface Conversation {
-  id: string;
-  user: User;
-  lastMessage: {
-    content: string;
-    timestamp: Date;
-    sender: "me" | "other";
-  };
-  unreadCount?: number;
-}
+import { User, Conversation } from "@/types/user";
 
 type View = "users" | "conversations" | "chat";
 

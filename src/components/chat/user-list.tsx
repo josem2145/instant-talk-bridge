@@ -1,67 +1,54 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, MessageCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { StatusIndicator } from "@/components/ui/status-indicator";
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  status: "online" | "away" | "busy" | "offline";
-  avatar?: string;
-  lastSeen?: string;
-}
+import { supabase } from "@/integrations/supabase/client";
+import { User } from "@/types/user";
 
 interface UserListProps {
   onStartChat: (user: User) => void;
 }
 
-// Mock data for demonstration
-const mockUsers: User[] = [
-  {
-    id: "1",
-    name: "Ana Silva",
-    email: "ana@email.com",
-    status: "online",
-    avatar: "",
-  },
-  {
-    id: "2",
-    name: "Carlos Santos",
-    email: "carlos@email.com",
-    status: "away",
-    avatar: "",
-  },
-  {
-    id: "3",
-    name: "Maria Oliveira",
-    email: "maria@email.com",
-    status: "online",
-    avatar: "",
-  },
-  {
-    id: "4",
-    name: "João Costa",
-    email: "joao@email.com",
-    status: "busy",
-    avatar: "",
-  },
-  {
-    id: "5",
-    name: "Lucia Ferreira",
-    email: "lucia@email.com",
-    status: "offline",
-    lastSeen: "há 2 horas",
-  },
-];
 
 export function UserList({ onStartChat }: UserListProps) {
   const [searchTerm, setSearchTerm] = useState("");
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    try {
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading users:', error);
+        return;
+      }
+
+      // Cast status to the correct type since it comes as string from DB
+      const typedProfiles = profiles?.map(profile => ({
+        ...profile,
+        status: profile.status as "online" | "away" | "busy" | "offline"
+      })) || [];
+      
+      setUsers(typedProfiles);
+    } catch (error) {
+      console.error('Error loading users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   
-  const filteredUsers = mockUsers.filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  const filteredUsers = users.filter(user =>
+    user.display_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -74,7 +61,7 @@ export function UserList({ onStartChat }: UserListProps) {
       case "online": return "Online";
       case "away": return "Ausente";
       case "busy": return "Ocupado";
-      case "offline": return user.lastSeen || "Offline";
+      case "offline": return user.last_seen || "Offline";
       default: return "Offline";
     }
   };
@@ -101,7 +88,12 @@ export function UserList({ onStartChat }: UserListProps) {
 
       {/* User List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {filteredUsers.map((user, index) => (
+        {loading ? (
+          <div className="text-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+            <p className="mt-2 text-muted-foreground">Carregando usuários...</p>
+          </div>
+        ) : filteredUsers.map((user, index) => (
           <div
             key={user.id}
             className="bg-white rounded-lg p-4 shadow-sm hover:shadow-message transition-all duration-300 animate-slide-in border border-gray-100"
@@ -111,9 +103,9 @@ export function UserList({ onStartChat }: UserListProps) {
               <div className="flex items-center space-x-3">
                 <div className="relative">
                   <Avatar className="h-12 w-12">
-                    <AvatarImage src={user.avatar} alt={user.name} />
+                    <AvatarImage src="" alt={user.display_name} />
                     <AvatarFallback className="bg-gradient-chat text-white font-semibold">
-                      {getInitials(user.name)}
+                      {getInitials(user.display_name)}
                     </AvatarFallback>
                   </Avatar>
                   <StatusIndicator
@@ -125,7 +117,7 @@ export function UserList({ onStartChat }: UserListProps) {
                 
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-foreground truncate">
-                    {user.name}
+                    {user.display_name}
                   </h3>
                   <p className="text-sm text-muted-foreground truncate">
                     {getStatusText(user)}
@@ -145,7 +137,7 @@ export function UserList({ onStartChat }: UserListProps) {
           </div>
         ))}
         
-        {filteredUsers.length === 0 && (
+        {!loading && filteredUsers.length === 0 && (
           <div className="text-center py-8">
             <div className="text-muted-foreground">
               Nenhum usuário encontrado
