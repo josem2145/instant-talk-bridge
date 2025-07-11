@@ -2,12 +2,41 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Chat App Design System - Modern communication theme */
 
 @layer base {
   :root {
+    /* Primary chat colors - blues and violets for communication */
+    --primary: 237 78% 60%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 237 78% 70%;
+    
+    /* Communication gradients */
+    --gradient-chat: linear-gradient(135deg, hsl(237 78% 60%), hsl(260 78% 65%));
+    --gradient-message: linear-gradient(135deg, hsl(237 78% 60%), hsl(237 78% 70%));
+    --gradient-subtle: linear-gradient(180deg, hsl(0 0% 100%), hsl(220 14% 96%));
+    
+    /* Status colors */
+    --status-online: 142 76% 36%;
+    --status-away: 45 93% 47%;
+    --status-busy: 0 84% 60%;
+    --status-offline: 215 20% 65%;
+    
+    /* Chat specific colors */
+    --chat-bubble-sent: 237 78% 60%;
+    --chat-bubble-received: 210 40% 96%;
+    --chat-input: 0 0% 100%;
+    --chat-sidebar: 220 14% 96%;
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    
+    /* Shadows with primary color */
+    --shadow-chat: 0 10px 30px -10px hsl(237 78% 60% / 0.3);
+    --shadow-message: 0 4px 12px -4px hsl(237 78% 60% / 0.2);
+    --shadow-glow: 0 0 40px hsl(237 78% 70% / 0.4);
+
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -17,8 +46,6 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;

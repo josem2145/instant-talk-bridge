@@ -1,13 +1,54 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from "react";
+import { LoginForm } from "@/components/auth/login-form";
+import ChatPage from "./Chat";
+import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { toast } = useToast();
+
+  const handleLogin = (email: string, password: string) => {
+    // Mock authentication - in real app this would be handled by Supabase
+    console.log("Login attempt:", { email, password });
+    setIsAuthenticated(true);
+    toast({
+      title: "Login realizado com sucesso!",
+      description: "Bem-vindo ao Chat App",
+    });
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    toast({
+      title: "Logout realizado",
+      description: "Você foi desconectado",
+    });
+  };
+
+  const handleForgotPassword = () => {
+    toast({
+      title: "Recuperação de senha",
+      description: "Funcionalidade em desenvolvimento",
+    });
+  };
+
+  const handleCreateAccount = () => {
+    toast({
+      title: "Criar conta",
+      description: "Funcionalidade em desenvolvimento",
+    });
+  };
+
+  if (isAuthenticated) {
+    return <ChatPage onLogout={handleLogout} />;
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
-    </div>
+    <LoginForm
+      onLogin={handleLogin}
+      onForgotPassword={handleForgotPassword}
+      onCreateAccount={handleCreateAccount}
+    />
   );
 };
 

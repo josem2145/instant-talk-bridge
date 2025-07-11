@@ -26,8 +26,19 @@ export default {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					glow: 'hsl(var(--primary-glow))'
 				},
+				/* Chat specific colors */
+				'chat-bubble-sent': 'hsl(var(--chat-bubble-sent))',
+				'chat-bubble-received': 'hsl(var(--chat-bubble-received))',
+				'chat-input': 'hsl(var(--chat-input))',
+				'chat-sidebar': 'hsl(var(--chat-sidebar))',
+				/* Status colors */
+				'status-online': 'hsl(var(--status-online))',
+				'status-away': 'hsl(var(--status-away))',
+				'status-busy': 'hsl(var(--status-busy))',
+				'status-offline': 'hsl(var(--status-offline))',
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
 					foreground: 'hsl(var(--secondary-foreground))'
@@ -68,7 +79,31 @@ export default {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
+			backgroundImage: {
+				'gradient-chat': 'var(--gradient-chat)',
+				'gradient-message': 'var(--gradient-message)',
+				'gradient-subtle': 'var(--gradient-subtle)',
+			},
+			boxShadow: {
+				'chat': 'var(--shadow-chat)',
+				'message': 'var(--shadow-message)',
+				'glow': 'var(--shadow-glow)',
+			},
 			keyframes: {
+				'slide-in': {
+					from: { opacity: '0', transform: 'translateY(10px)' },
+					to: { opacity: '1', transform: 'translateY(0)' }
+				},
+				'fade-in': {
+					from: { opacity: '0' },
+					to: { opacity: '1' }
+				},
+				'bounce-in': {
+					'0%': { transform: 'scale(0.3)', opacity: '0' },
+					'50%': { transform: 'scale(1.05)' },
+					'70%': { transform: 'scale(0.9)' },
+					'100%': { transform: 'scale(1)', opacity: '1' }
+				},
 				'accordion-down': {
 					from: {
 						height: '0'
@@ -87,6 +122,9 @@ export default {
 				}
 			},
 			animation: {
+				'slide-in': 'slide-in 0.3s ease-out',
+				'fade-in': 'fade-in 0.3s ease-out',
+				'bounce-in': 'bounce-in 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
 			}
