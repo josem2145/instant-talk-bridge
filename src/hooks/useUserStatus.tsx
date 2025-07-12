@@ -19,8 +19,8 @@ export function useUserStatus() {
     // Update status immediately
     updateUserStatus();
 
-    // Update status every 30 seconds while user is active
-    intervalId = setInterval(updateUserStatus, 30000);
+    // Update status every 5 seconds to keep all users online
+    intervalId = setInterval(updateUserStatus, 5000);
 
     // Update status on user activity
     const handleActivity = () => {

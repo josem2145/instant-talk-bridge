@@ -19,6 +19,26 @@ export function UserList({ onStartChat }: UserListProps) {
 
   useEffect(() => {
     loadUsers();
+    
+    // Set up real-time subscription for user status updates
+    const channel = supabase
+      .channel('profiles-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'profiles'
+        },
+        () => {
+          loadUsers(); // Reload users when any profile is updated
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const loadUsers = async () => {
@@ -33,10 +53,10 @@ export function UserList({ onStartChat }: UserListProps) {
         return;
       }
 
-      // Cast status to the correct type since it comes as string from DB
+      // Cast status to the correct type and force all users to show as online
       const typedProfiles = profiles?.map(profile => ({
         ...profile,
-        status: profile.status as "online" | "away" | "busy" | "offline"
+        status: "online" as "online" | "away" | "busy" | "offline"
       })) || [];
       
       setUsers(typedProfiles);

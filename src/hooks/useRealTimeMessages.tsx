@@ -52,7 +52,7 @@ export function useRealTimeMessages({ conversationId, currentUserId }: UseRealTi
     if (!conversationId) return;
 
     const channel = supabase
-      .channel('messages-channel')
+      .channel(`messages-${conversationId}`)
       .on(
         'postgres_changes',
         {
@@ -63,10 +63,18 @@ export function useRealTimeMessages({ conversationId, currentUserId }: UseRealTi
         },
         (payload) => {
           const newMessage = payload.new as RealTimeMessage;
-          setMessages(prev => [...prev, newMessage]);
+          console.log('New message received:', newMessage);
+          setMessages(prev => {
+            // Check if message already exists to avoid duplicates
+            const exists = prev.find(msg => msg.id === newMessage.id);
+            if (exists) return prev;
+            return [...prev, newMessage];
+          });
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Real-time subscription status:', status);
+      });
 
     return () => {
       supabase.removeChannel(channel);
