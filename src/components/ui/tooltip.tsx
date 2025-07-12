@@ -3,19 +3,10 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 import { cn } from "@/lib/utils"
 
-// Safe TooltipProvider wrapper that handles React being null
-const TooltipProvider = React.forwardRef<
-  React.ElementRef<typeof TooltipPrimitive.Provider>,
-  React.ComponentPropsWithoutRef<typeof TooltipPrimitive.Provider>
->(({ children, ...props }, ref) => {
-  // If React hooks are not available, render children directly
-  if (!React || !React.useState) {
-    return <>{children}</>;
-  }
-  
-  return <TooltipPrimitive.Provider {...props}>{children}</TooltipPrimitive.Provider>;
-});
-TooltipProvider.displayName = "TooltipProvider";
+// Completely safe TooltipProvider that just renders children
+const TooltipProvider: React.FC<{ children: React.ReactNode; delayDuration?: number }> = ({ children }) => {
+  return <>{children}</>;
+};
 
 const Tooltip = TooltipPrimitive.Root
 
