@@ -3,7 +3,7 @@ import { User, Session } from "@supabase/supabase-js";
 import { LoginForm } from "@/components/auth/login-form";
 import { SignupForm } from "@/components/auth/signup-form";
 import ChatPage from "./Chat";
-import { useToast } from "@/hooks/use-toast";
+// import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 
@@ -12,7 +12,7 @@ const Index = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [showSignup, setShowSignup] = useState(false);
   const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  // const { toast } = useToast();
 
   useEffect(() => {
     // Set up auth state listener
@@ -42,23 +42,12 @@ const Index = () => {
       });
 
       if (error) {
-        toast({
-          title: "Erro ao fazer login",
-          description: error.message,
-          variant: "destructive",
-        });
+        console.error("Login error:", error.message);
       } else {
-        toast({
-          title: "Login realizado com sucesso!",
-          description: "Bem-vindo ao Chat App",
-        });
+        console.log("Login successful");
       }
     } catch (error) {
-      toast({
-        title: "Erro inesperado",
-        description: "Tente novamente mais tarde",
-        variant: "destructive",
-      });
+      console.error("Unexpected login error:", error);
     }
   };
 
@@ -76,48 +65,27 @@ const Index = () => {
       });
 
       if (error) {
-        toast({
-          title: "Erro ao criar conta",
-          description: error.message,
-          variant: "destructive",
-        });
+        console.error("Signup error:", error.message);
       } else {
-        toast({
-          title: "Conta criada com sucesso!",
-          description: "Verifique seu email para confirmar a conta",
-        });
+        console.log("Account created successfully");
         setShowSignup(false);
       }
     } catch (error) {
-      toast({
-        title: "Erro inesperado",
-        description: "Tente novamente mais tarde",
-        variant: "destructive",
-      });
+      console.error("Unexpected signup error:", error);
     }
   };
 
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      toast({
-        title: "Logout realizado",
-        description: "Você foi desconectado",
-      });
+      console.log("Logout successful");
     } catch (error) {
-      toast({
-        title: "Erro ao fazer logout",
-        description: "Tente novamente",
-        variant: "destructive",
-      });
+      console.error("Logout error:", error);
     }
   };
 
   const handleForgotPassword = () => {
-    toast({
-      title: "Recuperação de senha",
-      description: "Funcionalidade em desenvolvimento",
-    });
+    console.log("Password recovery - feature in development");
   };
 
   const handleCreateAccount = () => {
